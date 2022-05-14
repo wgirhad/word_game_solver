@@ -1,13 +1,21 @@
 puts 'Wordle Solver'
-words = File.read('words.txt').split("\n")
 
+file = ARGV.shift
+words = File.read(file.nil? ? 'words.txt' : file).split("\n")
+
+x = 0
 while true
     guess = words.at(rand(words.count))
 
+    if not ARGV.at(x).nil?
+        guess = ARGV.at(x)
+    end
+
+    x += 1
     puts "Try \"#{guess}\""
     print 'Type in the result (h for help, x to skip, q to quit): '
 
-    result = gets.strip
+    result = $stdin.gets.strip
     if result == 'h'
         puts 'Super helpful help message...'
         next
