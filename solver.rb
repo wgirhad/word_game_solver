@@ -5,50 +5,66 @@ words = File.read(file.nil? ? 'words.txt' : file).split("\n")
 
 x = 0
 while true
-    guess = words.at(rand(words.count))
+  guess = words.at(rand(words.count))
 
-    if not ARGV.at(x).nil?
-        guess = ARGV.at(x)
+  if not ARGV.at(x).nil?
+    guess = ARGV.at(x)
+  end
+
+  x += 1
+  puts "Try \"#{guess}\""
+  print 'Type in the result (h for help, x to skip, q to quit): '
+
+  result = $stdin.gets.strip
+  if result == 'h'
+    puts 'Super helpful help message...'
+    next
+  end
+
+  if result == 'x'
+    next
+  end
+
+  if result == 'q'
+    break
+  end
+
+  if result == 'p'
+    words.each { |a| puts a}
+    next
+  end
+
+  hint = result.split('')
+
+  hints = []
+  hint.each_index do |i|
+    score = hint.at(i).to_i
+    hints.push({
+      index: i,
+      score: score,
+      letter: guess[i],
+    })
+  end
+
+  hints.each do |hint|
+    letter = hint[:letter]
+    score = hint[:score]
+    i = hint[:index]
+
+    if score < 2
+      words.select! { |word| word[i] != letter }
     end
 
-    x += 1
-    puts "Try \"#{guess}\""
-    print 'Type in the result (h for help, x to skip, q to quit): '
-
-    result = $stdin.gets.strip
-    if result == 'h'
-        puts 'Super helpful help message...'
-        next
+    if score == 2
+      words.select! { |word| word[i] == letter }
     end
 
-    if result == 'x'
-        next
+    tcount = hints.count { |h| h[:letter] == letter }
+    count = hints.count { |h| h[:letter] == letter && h[:score] > 0 }
+    if tcount > count
+      words.select! { |word| word.count(letter) == count }
+    else
+      words.select! { |word| word.count(letter) >= count }
     end
-
-    if result == 'q'
-        break
-    end
-
-    hint = result.split('')
-
-    hint.each_index do |i|
-        score = hint.at(i)
-        letter = guess[i]
-
-        if score == '0'
-            words.select! { |word| word[i] != letter }
-            if guess.count(letter) == 1
-                words.select! { |word| word.count(letter).zero? }
-            end
-        end
-
-        if score == '1'
-            words.select! { |word| !word.index(letter).nil? }
-            words.select! { |word| word[i] != letter }
-        end
-
-        if score == '2'
-            words.select! { |word| word[i] == letter }
-        end
-    end
+  end
 end
